@@ -176,7 +176,7 @@
             mapselector.appendChild(createButton(x));
         }
     }
-    init();
+    window.onload = init();
     function createButton(str){
         let button = document.createElement("button");
         button.id = str;
@@ -221,4 +221,4 @@
             
         </canvas>    
     </div>
-</div>s
+</div>
