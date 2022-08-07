@@ -1,0 +1,223 @@
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<script>
+    testmode = false;
+
+    var maplist = new Array();
+    maplist["Erangel"] = {
+        "width" : 8000,
+        "height" : 8000,
+        "size" : 8,        
+    }
+    maplist["Miramar"] = {
+        "width" : 8000,
+        "height" : 8000,
+        "size" : 8,        
+    }
+    maplist["Taego"] = {
+        "width" : 8000,
+        "height" : 8000,
+        "size" : 8,        
+    }
+    maplist["DESTON"] = {
+        "width" : 8000,
+        "height" : 8000,
+        "size" : 8,        
+    }
+    maplist["Vikendi"] = {
+        "width" : 6000,
+        "height" : 6000,
+        "size" : 6,        
+    }
+    maplist["Sanhok"] = {
+        "width" : 4000,
+        "height" : 4000,
+        "size" : 4,        
+    }
+    maplist["Paramo"] = {
+        "width" : 3000,
+        "height" : 3000,
+        "size" : 3,        
+    }
+    maplist["Karakin"] = {
+        "width" : 2000,
+        "height" : 2000,
+        "size" : 2,        
+    }
+    maplist["HAVEN"] = {
+        "width" : 1000,
+        "height" : 1000,
+        "size" : 1,        
+    }
+    // maplist[""] = {
+    //     "width" : 8000,
+    //     "height" : 8000,
+    //     "size" : 8,        
+    // }
+
+    var dir = "../winds/bgdistance/map/"
+    var selectedmap = "Erangel";
+	
+	
+    function init(){
+        changeMap("Erangel")
+        var map = document.getElementById("map");
+        var canv = document.getElementById("pin");
+
+        var ctx = canv.getContext("2d");
+        var isdown = false;
+        var ismdown = false;
+        var mcount = 0;
+        var mx = 0;
+        var my = 0;
+        var transx = 0;
+        var transy = 0;
+        var otransx = 0;
+        var otransy = 0;
+
+        var zoom = 1;
+
+        canv.addEventListener("mousedown",function(e) {
+            console.log(e)
+            if(e.button == 0){
+                isdown = true;
+                resizeCanvasToDisplaySize(ctx.canvas);
+    
+                mx = e.offsetX;
+                my = e.offsetY;
+            }else if(e.button == 1){                
+                ismdown = true;
+                resizeCanvasToDisplaySize(ctx.canvas);
+    
+                mx = e.offsetX;
+                my = e.offsetY;
+
+                otransx = transx;
+                otransy = transy;                
+            }
+        });
+        canv.addEventListener("mousemove",function(e) {
+            if(isdown){                
+                mmx = e.offsetX;
+                mmy = e.offsetY;
+
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+                ctx.beginPath();
+                ctx.strokeStyle = "#FF0000";
+                ctx.lineWidth = 2;
+                ctx.moveTo(mx, my);    
+                ctx.lineTo(mmx, mmy);
+                ctx.stroke();
+                //ratio ctx.canvas.width : maplist["Erangel"].width = dist : x
+                //zoom mmx-mx : zoomed = 
+
+                let dist = maplist[selectedmap].width*(Math.sqrt(Math.pow(mmx-mx,2) + Math.pow(mmy-my,2)))/ctx.canvas.width/zoom;
+                console.log(selectedmap,maplist[selectedmap].width)
+                                
+                let str = dist.toFixed(2)+" m";
+                ctx.fillStyle = "#000000";
+                ctx.fillRect(mmx, mmy, 10, ctx.measureText(str)+10);
+                ctx.font = "15px Arial";
+                ctx.fillStyle = "#FFFFFF";
+                ctx.fillText(str, mmx+4, mmy+5);
+            }
+            if(ismdown){ 
+                mmx = e.offsetX;
+                mmy = e.offsetY;
+
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                transx = otransx +(mmx-mx)/zoom;
+                transy = otransy + (mmy-my)/zoom;
+
+                map.style.transform = "scale("+zoom+") translate("+transx+"px ,"+transy+"px)";                
+            }
+        });
+        canv.addEventListener("mouseup",function(e) {
+            if(e.button == 0){
+                console.log("#",e.offsetX,e.offsetX)
+            }else if(e.button == 1){  
+            }
+                isdown = false;
+                ismdown = false;
+                mcount = 0;
+        });
+        canv.addEventListener("mouseout",function(e) {
+            if(e.button == 0){
+                console.log("#",e.offsetX,e.offsetX)
+            }else if(e.button == 1){  
+            }
+                isdown = false;
+                ismdown = false;
+                mcount = 0;
+        });
+
+        
+        canv.addEventListener("wheel",function(e) {
+            
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            if(e.deltaY<0){
+                if(zoom>10) return;
+                zoom+=0.5
+                map.style.transform="scale("+zoom+") translate("+transx+"px ,"+transy+"px)";//" translate("+(e.offsetX-e.target.offsetWidth)/zoom+"px,"+(e.offsetY-e.target.offsetHeight)/zoom+"px)";
+            }else if(e.deltaY>0){
+                if(zoom<=1) return;
+                zoom-=0.5
+                map.style.transform="scale("+zoom+") translate("+transx+"px ,"+transy+"px)";// translate("+(e.offsetX-e.target.offsetWidth)/zoom+"px,"+(e.offsetY-e.target.offsetHeight)/zoom+"px)";
+            }
+            console.log(Math.round(zoom*10)/10)
+            
+        });
+
+        var mapselector = document.getElementById("mapselector");
+        mapselector.innerHTML = "";
+        for(var x in maplist){
+            console.log(x)
+            mapselector.appendChild(createButton(x));
+        }
+    }
+    init();
+    function createButton(str){
+        let button = document.createElement("button");
+        button.id = str;
+        button.class = "mapbutton";
+        button.innerHTML = str;
+        button.addEventListener("click",function(x){
+            changeMap(str);
+        });
+
+        return button;
+    }
+    function changeMap(str){
+        console.log(str);
+        map.src = dir+str+".png";
+        selectedmap = str;
+    }
+    function resizeCanvasToDisplaySize(canvas) {
+        // look up the size the canvas is being displayed
+        const width = canvas.clientWidth;
+        const height = canvas.clientHeight;
+
+        // If it's resolution does not match change it
+        if (canvas.width !== width || canvas.height !== height) {
+            canvas.width = width;
+            canvas.height = height;
+            return true;
+        }
+
+        return false;
+    }
+</script>
+<style>
+    
+</style>
+<div style="position:relative;width:100%;height:100%;">
+    <div id="mapselector" style="position:relative;left:0px;top:0px;width:100%;height:48px;">
+        
+    </div>
+    <div id="mappanel" style="position:relative;left:0px;top:0px;width:100%;height:calc(100% - 50px);overflow: hidden;">
+        <img id="map" src="" style="position:absolute;left:0px;top:0px;width:100%;height:100%;">
+        <canvas id="pin" style="position:absolute;left:0px;top:0px;width:100%;height:100%">
+            
+        </canvas>    
+    </div>
+</div>
