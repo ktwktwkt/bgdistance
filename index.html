@@ -58,7 +58,7 @@
     var selectedmap = "Erangel";
 	var map = "";
 	var canv = "";
-    function init(){
+    window.onload = function(){
         map = document.getElementById("map");
         canv = document.getElementById("pin");
 		
@@ -176,7 +176,7 @@
             mapselector.appendChild(createButton(x));
         }
     }
-    window.onload = init();
+    //window.onload = init();
     function createButton(str){
         let button = document.createElement("button");
         button.id = str;
